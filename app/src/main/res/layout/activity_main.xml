@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.example.triops.MainActivity" >
+
+    <TextView
+        android:id="@+id/tvwInfoHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/tvwPassword"
+        android:layout_alignLeft="@+id/tvwPassword"
+        android:layout_alignParentTop="true"
+        android:layout_alignEnd="@+id/svw_log_scroller"
+        android:layout_alignRight="@+id/svw_log_scroller"
+        android:text="@string/hello_world" />
+
+    <RelativeLayout
+        android:id="@+id/rltvlyt_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvwInfoHeader"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_toLeftOf="@+id/textView"
+        android:layout_toStartOf="@+id/textView">
+
+        <TextView
+            android:id="@+id/tvwPassword"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/edtPassword"
+            android:layout_alignBottom="@+id/edtPassword"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:text="@string/password" />
+
+        <EditText
+            android:id="@+id/edtPassword"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tvwInfoHeader"
+            android:layout_toRightOf="@+id/tvwPassword"
+            android:layout_toEndOf="@+id/tvwPassword"
+            android:ems="9"
+            android:hint="@string/password_hint"
+            android:inputType="textPassword">
+
+            <requestFocus />
+        </EditText>
+
+        <CheckBox
+            android:id="@+id/chkPassword"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="edtPassword_toggle"
+            android:text=""
+            android:layout_alignBottom="@+id/edtPassword"
+            android:layout_toRightOf="@+id/edtPassword"
+            android:layout_toEndOf="@+id/edtPassword" />
+
+        <Button
+            android:id="@+id/btnChoosePasswordFile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="selectPasswordFile"
+            android:text="@string/choose_password_file"
+            android:textAllCaps="false"
+            android:enabled="true"
+            android:visibility="invisible"
+            android:layout_centerHorizontal="true"
+            android:layout_alignWithParentIfMissing="false"
+            android:layout_alignBottom="@+id/chkPassword"
+            android:textColor="#e871ff" />
+
+        <TextView
+            android:id="@+id/tvwPasswordFile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:visibility="invisible"
+            android:layout_below="@+id/btnChoosePasswordFile"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignRight="@+id/chkPassword"
+            android:layout_alignEnd="@+id/chkPassword"
+            android:textColor="#e871ff" />
+
+    </RelativeLayout>
+
+    <!--
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/password_method_text"
+        android:id="@+id/textView"
+        android:layout_above="@+id/tglbtn_password_method"
+        android:layout_alignRight="@+id/tvwInfoHeader"
+        android:layout_alignEnd="@+id/tvwInfoHeader"
+        android:layout_toRightOf="@+id/btnAction"
+        android:layout_toEndOf="@+id/btnAction"
+        android:layout_alignParentTop="true" />
+        -->
+
+    <ToggleButton
+        android:id="@+id/tglbtn_password_method"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAllCaps="false"
+        android:onClick="tglbtn_password_method_toggle"
+        android:layout_toRightOf="@+id/rltvlyt_header"
+        android:layout_toEndOf="@+id/rltvlyt_header"
+        android:textOff="@string/password_method_text"
+        android:textOn="@string/password_method_text"
+        android:layout_above="@+id/btnAction"
+        android:layout_below="@+id/tvwInfoHeader"
+        android:textSize="12dp" />
+
+    <Button
+        android:id="@+id/btnChooseFile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/svw_log_scroller"
+        android:layout_alignStart="@+id/svw_log_scroller"
+        android:layout_below="@+id/rltvlyt_header"
+        android:layout_marginLeft="10dp"
+        android:layout_marginStart="28dp"
+        android:onClick="selectFile"
+        android:text="@string/choose_file"
+        android:textAllCaps="false"
+        android:textColor="#2964ff" />
+    
+    <Button
+        android:id="@+id/btnAction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/rltvlyt_header"
+        android:layout_toRightOf="@+id/btnChooseFile"
+        android:layout_toEndOf="@+id/btnChooseFile"
+        android:layout_marginLeft="32dp"
+        android:layout_marginStart="32dp"
+        android:onClick="crypt_operation"
+        android:text="@string/action" />
+
+    <TextView
+        android:id="@+id/tvwInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/info_choose_file"
+        android:layout_below="@+id/btnChooseFile"
+        android:layout_alignEnd="@+id/svw_log_scroller"
+        android:layout_alignRight="@+id/svw_log_scroller"
+        android:layout_toLeftOf="@+id/btnAction"
+        android:layout_toStartOf="@+id/btnAction"
+        android:textColor="#2964ff" />
+
+    <ScrollView
+        android:id="@+id/svw_log_scroller"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/tvwInfo"
+        android:layout_marginTop="10dp"
+        android:fillViewport="true"
+        android:scrollbars="vertical" >
+
+        <TextView
+            android:id="@+id/tvw_log_text"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:singleLine="false"
+            android:text="@string/initiallogtext"
+            android:linksClickable="false"
+            android:clickable="false" />
+
+    </ScrollView>
+
+</RelativeLayout>
