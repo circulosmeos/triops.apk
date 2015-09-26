@@ -2,7 +2,7 @@ triops.apk:
 a simple Android tool for encryption/decryption of files.   
 
 apk available here:   
-[](http://wp.me/p2FmmK-8T)
+[circulosmeos @ wordpress](http://wp.me/p2FmmK-8T)
 
 ![](https://circulosmeos.files.wordpress.com/2015/09/triops-apk1.png)
 
@@ -18,7 +18,7 @@ Features:
 * Mentioned hint used to check that the password for decryption is correct is *not* the same used to encrypt (obviously!). Separate hashes are used for both purposes, though both are derived via different ways from the password and IV, using some 500-1000 concatenated KECCAK hashes.
 * Encrypted files are appended the extension .$#3 to filename, so they can be recognized.
 * Password can be obtained from keyboard or from a file:
-* Binary files can be used as passwords: for example jpg images, etc. Caution: do not lose this 'password' file and do not modify it!
+* Binary files can be used as passwords: for example jpg images, etc. Caution: do not lose this 'password' file and do not modify it!   
 ![](https://circulosmeos.files.wordpress.com/2015/09/triops-apk-file_as_password.png)
 * Speed is extremely high, as CHACHA20 is a very fast encryption algorithm: it is as fast as RC4.
 * Code for the Android file browser is a slightly modified version of ingyesid‘s [simple-file-chooser](https://github.com/ingyesid/simple-file-chooser).
@@ -35,7 +35,7 @@ Known limitations:
 Please, refer to [triops](https://www.github.com/circulosmeos/triops) project for more details.
    
    
-   
+
 Note:   
 * The sample encrypted file "gplv3.txt.$#3" can be decrypted with the password "triops!"   
 
