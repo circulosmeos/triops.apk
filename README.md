@@ -2,7 +2,7 @@ triops.apk:
 a simple Android tool for encryption/decryption of files.   
 
 apk available here:   
-[circulosmeos @ wordpress](http://wp.me/p2FmmK-8T)
+[http://wp.me/p2FmmK-8T](http://wp.me/p2FmmK-8T)
 
 ![](https://circulosmeos.files.wordpress.com/2015/09/triops-apk1.png)
 
@@ -20,14 +20,13 @@ Features:
 * Password can be obtained from keyboard or from a file:
 * Binary files can be used as passwords: for example jpg images, etc. Caution: do not lose this 'password' file and do not modify it!   
 ![](https://circulosmeos.files.wordpress.com/2015/09/triops-apk-file_as_password.png)
-* Speed is extremely high, as CHACHA20 is a very fast encryption algorithm: it is as fast as RC4.
+* Speed is extremely high: the app uses a native OS library and CHACHA20 is a very fast encryption algorithm: it is as fast as RC4.
 * Code for the Android file browser is a slightly modified version of ingyesid‘s [simple-file-chooser](https://github.com/ingyesid/simple-file-chooser).
 * Licensed as [GPL v3](http://www.gnu.org/licenses/gpl-3.0.html)
 
 Known limitations:   
 
 * Files greater than 2 GiB cannot be managed.
-* x86 and ARM processors are tested, but this app has not been tested on MIPS processor devices.   
 * Original file modification time is not maintained in Android as it is on cmdline tool, due to [some platform inherent problems](https://code.google.com/p/android/issues/detail?id=18624).
    
    
