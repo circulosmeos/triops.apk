@@ -1,6 +1,9 @@
 triops.apk:   
 a simple Android tool for encryption/decryption of files.   
 
+apk available here:   
+[](http://wp.me/p2FmmK-8T)
+
 ![](https://circulosmeos.files.wordpress.com/2015/09/triops-apk1.png)
 
 It uses [CHACHA20](http://en.wikipedia.org/wiki/Salsa20#ChaCha_variant) as algorithm for encryption/decryption and [KECCAK](http://en.wikipedia.org/wiki/SHA-3)-512 as hash algorithm.   
@@ -27,9 +30,13 @@ Known limitations:
 * x86 and ARM processors are tested, but this app has not been tested on MIPS processor devices.   
 * Original file modification time is not maintained in Android as it is on cmdline tool, due to [some platform inherent problems](https://code.google.com/p/android/issues/detail?id=18624).
    
-
-
+   
+   
 Please, refer to [triops](https://www.github.com/circulosmeos/triops) project for more details.
+   
+   
    
 Note:   
 * The sample encrypted file "gplv3.txt.$#3" can be decrypted with the password "triops!"   
+
+
