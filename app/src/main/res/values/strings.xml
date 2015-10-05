@@ -3,7 +3,7 @@
 
     <string name="app_name">triops</string>
     <string name="hello_world">triops : encrypt and decrypt files.</string>
-    <string name="action_settings">triops v7.2.1</string>
+    <string name="action_settings">triops v7.3</string>
     <string name="submenu_exit">Exit</string>
     <string name="choose_file">Choose file &#8230;</string>
     <string name="choose_password_file">file to be used as password&#8230;</string>
@@ -13,7 +13,7 @@
     <string name="filebrowser_name">File Browser</string>
     <string name="password">Password:</string>
     <string name="password_hint">password...</string>
-	<string name="initiallogtext">triops (v7.2.1) port to Android, version 1.0 (2015&#8211;09)\n  <a href ="https://wp.me/p2FmmK-8T">circulosmeos.wordpress.com</a>\n  <a href="https://github.com/circulosmeos/triops.apk">github.com/circulosmeos/triops.apk</a>\nlicensed under GNU General Public License (GPL) v3\n\nEncrypt and decrypt files \n  with <a href="https://en.wikipedia.org/wiki/Salsa20#ChaCha20_adoption">CHACHA20</a>+<a href="https://en.wikipedia.org/wiki/SHA-3#History">KECCAK</a>.\nOperation will be automagically inferred from file extension.\n\n</string>
+	<string name="initiallogtext">triops (v7.3) port to Android, version 1.1 (2015&#8211;10)\n  <a href ="https://wp.me/p2FmmK-8T">circulosmeos.wordpress.com</a>\n  <a href="https://github.com/circulosmeos/triops.apk">github.com/circulosmeos/triops.apk</a>\nlicensed under GNU General Public License <a href="http://www.gnu.org/licenses/gpl-3.0.en.html">(GPL) v3</a>.\n\nEncrypt and decrypt files \n  with <a href="https://en.wikipedia.org/wiki/Salsa20#ChaCha20_adoption">CHACHA20</a>+<a href="https://en.wikipedia.org/wiki/SHA-3#History">KECCAK</a>.\nOperation will be automagically inferred from file extension.\n\n</string>
 
     <string name="fileSize">File Size</string>
     <string name="currentDir">Current Dir</string>

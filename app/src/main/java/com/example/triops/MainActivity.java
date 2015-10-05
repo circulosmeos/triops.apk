@@ -108,15 +108,17 @@ public class MainActivity extends ActionBarActivity {
 	private void onExitItemClick(){
 
 		// delete any trace of use in this session:
-		((EditText)findViewById(R.id.edtPassword)).setText("");
-		((TextView)findViewById(R.id.tvwInfo)).setText("");
-		((TextView)findViewById(R.id.tvwPasswordFile)).setText("");
+		final String strOverwrite="012345678901234567890123456789";
+		((EditText)findViewById(R.id.edtPassword)).setText(strOverwrite);
+		((TextView)findViewById(R.id.tvwInfo)).setText(strOverwrite);
+		((TextView)findViewById(R.id.tvwPasswordFile)).setText(strOverwrite);
 		strLogs ="";
 		showLogs();
 		findViewById(R.id.edtPassword).setVisibility(View.INVISIBLE);
 		findViewById(R.id.tvwPassword).setVisibility(View.INVISIBLE);
 		findViewById(R.id.chkPassword).setVisibility(View.INVISIBLE);
 		findViewById(R.id.btnChoosePasswordFile).setVisibility(View.INVISIBLE);
+		findViewById(R.id.tvwInfo).setVisibility(View.INVISIBLE);
 		findViewById(R.id.tvwPasswordFile).setVisibility(View.INVISIBLE);
 		findViewById(R.id.tglbtn_password_method).setVisibility(View.INVISIBLE);
 		findViewById(R.id.btnAction).setVisibility(View.INVISIBLE);
