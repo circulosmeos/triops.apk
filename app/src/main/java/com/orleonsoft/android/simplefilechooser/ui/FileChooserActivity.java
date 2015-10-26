@@ -20,6 +20,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ListView;
+import android.widget.Toast;
 
 public class FileChooserActivity extends ListActivity {
 
@@ -55,6 +56,16 @@ public class FileChooserActivity extends ListActivity {
 		}
 		setInitialDirectory();
 		fill(currentFolder);
+
+		// show brief instructions for multiple selections with checkboxes:
+		if (extras != null &&
+				extras.getString(Constants.KEY_SHOW_CHECKBOXES_FOR_FILES) != null)
+			Toast.makeText(
+				this,
+				"You can check multiple files and then validate the choice by selecting any",
+				Toast.LENGTH_LONG
+			).show();
+
 	}
 
 	private void setInitialDirectory() {
@@ -85,7 +96,7 @@ public class FileChooserActivity extends ListActivity {
 				currentFolder = currentFolder.getParentFile();
 				fill(currentFolder);
 			} else {*/
-				Log.i("FILE CHOOSER", "canceled");
+				//Log.i("FILE CHOOSER", "canceled");
 				setResult(Activity.RESULT_CANCELED);				
 				finish();
 			/*}*/
@@ -110,13 +121,13 @@ public class FileChooserActivity extends ListActivity {
 					//si es un directorio en el data ponemos la constante folder
 					dirs.add(new FileInfo(file.getName(),
 							Constants.FOLDER, file.getAbsolutePath(),
-							true, false));
+							true, false, false));
 				else {
 					if (!file.isHidden())
 						files.add(new FileInfo(file.getName(),
 								getString(R.string.fileSize) + ": "
 										+ file.length(),
-								file.getAbsolutePath(), false, false));
+								file.getAbsolutePath(), false, false, true));
 				}
 			}
 		} catch (Exception e) {
@@ -131,7 +142,7 @@ public class FileChooserActivity extends ListActivity {
 			//si es un directorio padre en el data ponemos la constante adeacuada
 				dirs.add(0, new FileInfo(Constants.PARENT_FOLDER,
 						f.getAbsolutePath(), f.getParent(),
-						false, true));
+						false, true, false));
 		/*}*/
 		fileArrayListAdapter = new FileArrayAdapter(FileChooserActivity.this,
 				R.layout.file_row, dirs);
@@ -142,19 +153,45 @@ public class FileChooserActivity extends ListActivity {
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 
 		super.onListItemClick(l, v, position, id);
-		FileInfo fileDescriptor = fileArrayListAdapter.getItem(position);
-		if (fileDescriptor.isFolder() || fileDescriptor.isParent()) {
-			currentFolder = new File(fileDescriptor.getPath());
-			fill(currentFolder);
-		} else {
+		ArrayList<String> list_of_selected_files = new ArrayList<String>();
 
-			fileSelected = new File(fileDescriptor.getPath());
+		// implements checkable items
+		// Extract all files checked, if any:
+		List<FileInfo> elements = fileArrayListAdapter.getCheckedItems();
+		if (elements.size() != 0) {
+			// there're files checked:
+			// return now with them as result:
+			for (FileInfo element : elements){
+				fileSelected = new File(element.getPath());
+				list_of_selected_files.add( fileSelected.getAbsolutePath() );
+			}
+			// pass array of files to MainActivity:
 			Intent intent = new Intent();
-			intent.putExtra(Constants.KEY_FILE_SELECTED,
-					fileSelected.getAbsolutePath());
+			intent.putStringArrayListExtra(Constants.KEY_FILE_SELECTED, list_of_selected_files);
 			setResult(Activity.RESULT_OK, intent);
-			Log.i("FILE CHOOSER", "result ok");
+			//Log.i("FILE CHOOSER", "result ok");
 			finish();
+
+		} else {
+			// no file checked, but one file selected:
+
+			FileInfo fileDescriptor = fileArrayListAdapter.getItem(position);
+
+			if (fileDescriptor.isFolder() || fileDescriptor.isParent()) {
+				currentFolder = new File(fileDescriptor.getPath());
+				fill(currentFolder);
+			} else {
+
+				fileSelected = new File(fileDescriptor.getPath());
+				list_of_selected_files.add(fileSelected.getAbsolutePath());
+				// pass array of 1 file to MainActivity:
+				Intent intent = new Intent();
+				intent.putStringArrayListExtra(Constants.KEY_FILE_SELECTED, list_of_selected_files);
+				setResult(Activity.RESULT_OK, intent);
+				//Log.i("FILE CHOOSER", "result ok");
+				finish();
+			}
+
 		}
 	}
 

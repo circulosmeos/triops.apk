@@ -1,26 +1,34 @@
 package com.orleonsoft.android.simplefilechooser.adapters;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.orleonsoft.android.simplefilechooser.Constants;
 import com.orleonsoft.android.simplefilechooser.FileInfo;
 import com.example.triops.R;
+import com.orleonsoft.android.simplefilechooser.ui.FileChooserActivity;
 
 @SuppressLint("DefaultLocale")
-public class FileArrayAdapter extends ArrayAdapter<FileInfo> {
+public class FileArrayAdapter extends ArrayAdapter<FileInfo> implements
+		CompoundButton.OnCheckedChangeListener {
 
 	private Context context;
 	private int resorceID;
 	private List<FileInfo> items;
+	//private SparseBooleanArray bCheckVisibility; // implements checkable items
+	private SparseBooleanArray bCheckState; // implements checkable items
 
 	public FileArrayAdapter(Context context, int textViewResourceId,
 			List<FileInfo> objects) {
@@ -28,15 +36,51 @@ public class FileArrayAdapter extends ArrayAdapter<FileInfo> {
 		this.context = context;
 		this.resorceID = textViewResourceId;
 		this.items = objects;
+
+		// implements checkable items
+		/*// which can be both visible
+		this.bCheckVisibility = new SparseBooleanArray(objects.size());
+		for (int i=0; i<bCheckVisibility.size(); i++) {
+			bCheckVisibility.put(i,items.get(i).getCheckboxVisible());
+		}*/
+		// and/or checked
+		this.bCheckState = new SparseBooleanArray(objects.size());
+		for (int i=0; i<bCheckState.size(); i++) {
+			bCheckState.put(i,items.get(i).getChecked());
+		}
 	}
 
 	public FileInfo getItem(int i) {
 		return items.get(i);
 	}
 
+	public List<FileInfo> getCheckedItems() {
+		// extract all files checked, if any
+		List<FileInfo> list_of_files = new ArrayList<FileInfo>();
+
+		for ( FileInfo element: this.items ) {
+			if ( element.getChecked() ) {
+				list_of_files.add(element);
+			}
+		}
+
+		return list_of_files;
+	}
+
+	// implements checkable items
+	public void onCheckedChanged(CompoundButton buttonView,
+								 boolean isChecked) {
+		FileInfo r = (FileInfo) buttonView.getTag();
+		r.setChecked(isChecked);
+		bCheckState.put(items.indexOf(r), isChecked);
+	}
+
 	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		ViewHolder viewHolder;
+		// implements checkable items
+		String showCheckBoxes = ((FileChooserActivity)context).getIntent().
+				getStringExtra(Constants.KEY_SHOW_CHECKBOXES_FOR_FILES);
 		if (convertView == null) {
 			LayoutInflater layoutInflater = (LayoutInflater) context
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -44,6 +88,10 @@ public class FileArrayAdapter extends ArrayAdapter<FileInfo> {
 			viewHolder = new ViewHolder();
 			viewHolder.icon = (ImageView) convertView
 					.findViewById(android.R.id.icon);
+			// implements checkable items
+			if ( showCheckBoxes != null &&
+					showCheckBoxes.equals(Constants.KEY_SHOW_CHECKBOXES_FOR_FILES) )
+				viewHolder.checkedFile = (CheckBox) convertView.findViewById(R.id.checkedFile);
 			viewHolder.name = (TextView) convertView.findViewById(R.id.name);
 			viewHolder.details = (TextView) convertView
 					.findViewById(R.id.details);
@@ -55,13 +103,33 @@ public class FileArrayAdapter extends ArrayAdapter<FileInfo> {
 		FileInfo option = items.get(position);
 		if (option != null) {
 
+			// implements checkable items
+			// in order to locate checkbox position in list, set a Tag:
+			if ( showCheckBoxes != null )
+				viewHolder.checkedFile.setTag(option); // Tag of FileInfo class
+
 			if (option.getData().equalsIgnoreCase(Constants.FOLDER)) {
 				viewHolder.icon.setImageResource(R.drawable.folder);
+				// implements checkable items
+				if ( showCheckBoxes != null )
+					viewHolder.checkedFile.setVisibility(View.INVISIBLE);
 			} else {
 				if (option.getName().equalsIgnoreCase(
 						Constants.PARENT_FOLDER)) {
 					viewHolder.icon.setImageResource(R.drawable.back);
+					// implements checkable items
+					if ( showCheckBoxes != null )
+						viewHolder.checkedFile.setVisibility(View.INVISIBLE);
 				} else {
+					// implements checkable items
+					if ( showCheckBoxes != null ) {
+						// visibility:
+						if (option.getCheckboxVisible())
+							viewHolder.checkedFile.setVisibility(View.VISIBLE);
+						// checkbox checked/unchecked:
+						viewHolder.checkedFile.setChecked(bCheckState.get(position, false));
+						viewHolder.checkedFile.setOnCheckedChangeListener(this);
+					}
 					String name = option.getName().toLowerCase();
 					if (name.endsWith(Constants.XLS)
 							|| name.endsWith(Constants.XLSX))
@@ -117,6 +185,7 @@ public class FileArrayAdapter extends ArrayAdapter<FileInfo> {
 		ImageView icon;
 		TextView name;
 		TextView details;
+		CheckBox checkedFile;
 	}
 
 }

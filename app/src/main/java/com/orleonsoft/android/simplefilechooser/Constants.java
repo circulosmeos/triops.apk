@@ -29,6 +29,9 @@ public interface Constants {
 
 	String KEY_INITIAL_DIRECTORY="INITIAL_DIRECTORY";
 
+	// implements checkable items
+	String KEY_SHOW_CHECKBOXES_FOR_FILES="SHOW_CHECKBOXES_FOR_FILES";
+
 	String FOLDER="Folder";
 	String PARENT_FOLDER="..";
 }

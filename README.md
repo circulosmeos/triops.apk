@@ -1,6 +1,8 @@
 triops.apk:   
 a simple Android tool for encryption/decryption of files.   
 
+Last version available and compiled is v1.2. Check [list of changes between versions](Changes.md).   
+
 apk available here:   
 [http://wp.me/p2FmmK-8T](http://wp.me/p2FmmK-8T)
 
