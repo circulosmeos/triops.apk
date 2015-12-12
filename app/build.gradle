@@ -8,7 +8,7 @@ android {
         applicationId "com.example.triops"
         minSdkVersion 7
         targetSdkVersion 22
-        versionName '1.2'
+        versionName '1.3'
         ndk {
             moduleName "com.example.triops"
         }
@@ -47,4 +47,6 @@ android {
 dependencies {
     compile 'com.android.support:support-v4:21.0.3'
     compile 'com.android.support:appcompat-v7:21.0.3'
+    compile project(':multiwindow-v1.2.6')
+    compile project(':sdk-v1.0.0')
 }

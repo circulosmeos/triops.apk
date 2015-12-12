@@ -1,9 +1,9 @@
 triops.apk:   
 a simple Android tool for encryption/decryption of files.   
 
-Last version available and compiled is v1.2. Check [list of changes between versions](Changes.md).   
+Last version available and compiled is v1.3. Check [list of changes between versions](Changes.md).   
 
-apk available here:   
+apk available [https://github.com/circulosmeos/triops.apk/releases/download/v1.3/triops.apk](here):   
 [http://wp.me/p2FmmK-8T](http://wp.me/p2FmmK-8T)
 
 ![](https://circulosmeos.files.wordpress.com/2015/09/triops-apk1.png)
@@ -25,6 +25,7 @@ Features:
 * Files bigger than 2 GiB can be managed.
 * Speed is extremely high: the app uses a native OS library and CHACHA20 is a very fast encryption algorithm: it is as fast as RC4.
 * Code for the Android file browser is a slightly modified version of ingyesid‘s [simple-file-chooser](https://github.com/ingyesid/simple-file-chooser).
+* Support for MultiWindow and drag-and-drop on Samsung's devices (file path text, via drag-n-drop Samsung's MultiWindow button).
 * Licensed as [GPL v3](http://www.gnu.org/licenses/gpl-3.0.html)
 
 Known limitations:   
