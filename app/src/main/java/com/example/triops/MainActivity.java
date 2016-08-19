@@ -45,8 +45,9 @@ public class MainActivity extends ActionBarActivity {
 	private final int colorEncryptBackground=0xFFFF6B5A;
 	private final int colorProceedBackground=0xFF8080FF;
 
-	private final String strExtension="$#3";
-	private final String strParameterForEncrypting="3";
+	private final String strTriopsGenericExtension="ooo"; // triops v>=9.0
+	private final String strTriopsExtensionMatch=".+\\.(\\$#3|ooo)$"; 	  // triops v<9.0 && triops v>=9.0
+	private String strParameterForEncrypting="3"; // triops' default encrypting scheme 
 
 	private final int REQUEST_CODE_GET_PASSWORD_FILE = 1;
 	private final int REQUEST_CODE_GET_FILE_TO_OVERWRITE = 2;
@@ -59,7 +60,7 @@ public class MainActivity extends ActionBarActivity {
 	ScrollView svwLog;
 
 	private enum FILE_OPERATION { OPERATION_CRYPT, OPERATION_DECRYPT }
-	
+
 	private boolean bEdtPassword = true;
 	private boolean bPasswordMethodFile = false;
 	private ArrayList<String> strExternalFile = null;
@@ -75,18 +76,18 @@ public class MainActivity extends ActionBarActivity {
      * installation time by the package manager.
      */
     static {
-        System.loadLibrary("com.example.triops");
+        System.loadLibrary("com.example.triops"); // triops
     }
 
 	// predefinition of JNI (external) method
 	//public native int triops(int argc, String[] argv);
-	public native int triops(String[] argv);
-	
+	public native int triops(String[] argv); // triops
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
+
 		tvwLog = (TextView)findViewById(R.id.tvw_log_text);
     	svwLog = (ScrollView)findViewById(R.id.svw_log_scroller);
     	strLogs = getResources().getString(R.string.initiallogtext);
@@ -118,10 +119,10 @@ public class MainActivity extends ActionBarActivity {
 				mMultiWindowActivity = new SMultiWindowActivity(this);
 
 				boolean success = mMultiWindowActivity
-						.setStateChangeListener(new SMultiWindowActivity.StateChangeListener() {
-							@Override
-							public void onModeChanged(boolean arg0) {
-								// TODO Auto-generated method stub
+					.setStateChangeListener(new SMultiWindowActivity.StateChangeListener() {
+						@Override
+						public void onModeChanged(boolean arg0) {
+							// TODO Auto-generated method stub
 							/*if (arg0) {
 								Toast.makeText(MainActivity.this,
 										"MultiWindow Mode is changed to Multi-Window",
@@ -131,30 +132,30 @@ public class MainActivity extends ActionBarActivity {
 										"MultiWindow Mode is changed to Normal-Window",
 										Toast.LENGTH_LONG).show();
 							}*/
-							}
+						}
 
-							@Override
-							public void onZoneChanged(int arg0) {
-								// TODO Auto-generated method stub
-								String zoneInfo = "Free zone";
-								if (arg0 == SMultiWindowActivity.ZONE_A) {
-									zoneInfo = "Zone A";
-								} else if (arg0 == SMultiWindowActivity.ZONE_B) {
-									zoneInfo = "Zone B";
-								}
+						@Override
+						public void onZoneChanged(int arg0) {
+							// TODO Auto-generated method stub
+							String zoneInfo = "Free zone";
+							if (arg0 == SMultiWindowActivity.ZONE_A) {
+								zoneInfo = "Zone A";
+							} else if (arg0 == SMultiWindowActivity.ZONE_B) {
+								zoneInfo = "Zone B";
+							}
 							/*Toast.makeText(MainActivity.this,
 									"Activity zone info is changed to " + zoneInfo,
 									Toast.LENGTH_LONG).show();*/
-							}
+						}
 
-							@Override
-							public void onSizeChanged(Rect arg0) {
-								// TODO Auto-generated method stub
+						@Override
+						public void onSizeChanged(Rect arg0) {
+							// TODO Auto-generated method stub
 							/*Toast.makeText(MainActivity.this,
 									"Activity size info is changed to " + arg0,
 									Toast.LENGTH_LONG).show();*/
-							}
-						});
+						}
+					});
 
 			} // if (mMultiWindow.isFeatureEnabled(SMultiWindow.MULTIWINDOW))
 		} // if (mMultiWindow.getVersionCode() > 0)
@@ -164,7 +165,10 @@ public class MainActivity extends ActionBarActivity {
 		// Creates a new drag event listener
 		myDragEventListener mDragListen = new myDragEventListener();
 
+		/* View imageView = new ImageView(this); */
+
 		// Sets the drag event listener for the View
+		/* imageView.setOnDragListener(mDragListen); */
 		findViewById(R.id.btnChooseFile).setOnDragListener(mDragListen);
 
 		findViewById(R.id.btnChoosePasswordFile).setOnDragListener(mDragListen);
@@ -334,6 +338,7 @@ public class MainActivity extends ActionBarActivity {
 		return true;
 	}
 
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
@@ -345,7 +350,7 @@ public class MainActivity extends ActionBarActivity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
-	
+
 	private void onExitItemClick(){
 
 		// delete any trace of use in this session:
@@ -434,7 +439,9 @@ public class MainActivity extends ActionBarActivity {
 		String[] strCommand;
 		ArrayList<String> filesOperated = new ArrayList<String>();
 		boolean bError = false;
-		
+		int iCommandReturnedValue;
+		int iErrors = 0;
+
 		// .............................................
 		// 0. extract password value
 		// .............................................
@@ -443,7 +450,7 @@ public class MainActivity extends ActionBarActivity {
 		} else {
 			strPassword = ((EditText) findViewById(R.id.edtPassword)).getText().toString();
 		}
-		
+
 		// .............................................
 		// 1. check that there's a password, and that it's acceptable:
 		// .............................................
@@ -510,44 +517,50 @@ public class MainActivity extends ActionBarActivity {
 			// .............................................
 			// 4. infer operation from file extension:
 			// .............................................
-			if ( file.matches(".+\\.\\" + strExtension + "$") ) {
-				operation=FILE_OPERATION.OPERATION_DECRYPT;
+			if ( file.matches( strTriopsExtensionMatch ) ) {
+				operation = FILE_OPERATION.OPERATION_DECRYPT;
 			} else {
-				operation=FILE_OPERATION.OPERATION_CRYPT;
+				operation = FILE_OPERATION.OPERATION_CRYPT;
 			}
 
 			// .............................................
 			// 5. construct the command string:
 			// .............................................
 			if ( operation == FILE_OPERATION.OPERATION_CRYPT ) {
-				strCommand = new String[5];
-				strCommand[4]=strParameterForEncrypting;
+				strCommand = new String[7];
+				strCommand[5] = "-e";
+				strCommand[6] = strParameterForEncrypting;
 			} else {
-				strCommand = new String[4];
+				strCommand = new String[5];
 			}
 			// we're gonna fake a command line operation with argc + *argv[]:
 			strCommand[0]="triops"; // first parameter is "executable" name, so, here: any value.
-			if ( ! bPasswordMethodFile )
-				strCommand[1]="_" + strPassword + "_";
-			else
-				strCommand[1]=strPassword;
-			strCommand[2]=file;
-			strCommand[3]="=";
+			if ( ! bPasswordMethodFile ) {
+				strCommand[3] = "-p";
+				strCommand[4] = strPassword;
+			} else {
+				strCommand[3] = "-P";
+				strCommand[4] = strPassword;
+			}
+			strCommand[1] = "-i";
+			strCommand[2] = file;
 
 			/*
-			strLogs +=strCommand[0]+" "+strCommand[1]+" "+strCommand[2]+" "+strCommand[3];
-			if (operation == FILE_OPERATION.OPERATION_CRYPT) strLogs+=" "+strCommand[4];
-			showLogs();*/
-
+			strLogs +=strCommand[0]+" "+strCommand[1]+" "+strCommand[2]+" "+strCommand[3]+" "+strCommand[4];
+			if (operation == FILE_OPERATION.OPERATION_CRYPT) strLogs+=" "+strCommand[5]+" "+strCommand[6];
+			showLogs();
+			*/
 
 			// .............................................
 			// 6. perform command & check output
 			// .............................................
 			// TODO: run in a Runnable the triops(strCommand)
-			if ( triops(strCommand) == 1) {
+			iCommandReturnedValue = triops(strCommand);
+			if ( iCommandReturnedValue != 0) { // triops
 				// Error !!!
 				// go on, but marks failure
 				bError = true;
+				iErrors++;
 				if (operation == FILE_OPERATION.OPERATION_CRYPT ) {
 					strLogs += "\n\nERROR encrypting:\n";
 				} else {
@@ -566,10 +579,10 @@ public class MainActivity extends ActionBarActivity {
 				}
 				strLogs += " on: " + extractFilename(file) + "\n";
 
-				if (file.matches(".+\\.\\" + strExtension + "$")) {
+				if (file.matches( strTriopsExtensionMatch )) {
 					filesOperated.add(file.substring(0, file.length() - 4) );
 				} else {
-					filesOperated.add(file + "." + strExtension );
+					filesOperated.add(file + "." + strTriopsGenericExtension );
 				}
 
 				// special case management:
@@ -596,18 +609,23 @@ public class MainActivity extends ActionBarActivity {
 			// so the inverse op is possible wuth just a click
 			strExternalFile = filesOperated;
 		} else {
-			// clear file selection
-			strExternalFile = null;
-			((TextView) findViewById(R.id.tvwInfo)).setText(R.string.info_choose_file);
-			// to default state (crypt):
-			((TextView) findViewById(R.id.btnAction)).setText(strBtnEncrypt);
-			((TextView) findViewById(R.id.btnAction)).getBackground().setColorFilter(colorEncryptBackground, PorterDuff.Mode.MULTIPLY);
+			// clear file selection:
+			if ( strExternalFile.size()==1 || (iErrors == strExternalFile.size()) ) {
+				// but if there's only one file selected or {multiple files and all of them failed}
+				// then do not clear file selections, so another password try be possible
+			} else {
+				strExternalFile = null;
+				((TextView) findViewById(R.id.tvwInfo)).setText(R.string.info_choose_file);
+				// to default state (crypt):
+				((TextView) findViewById(R.id.btnAction)).setText(strBtnEncrypt);
+				((TextView) findViewById(R.id.btnAction)).getBackground().setColorFilter(colorEncryptBackground, PorterDuff.Mode.MULTIPLY);
+			}
 		}
 		// in case of just one file selected, update GUI for reversible op:
 		if ( !bError &&
 				strExternalFile.size() == 1 ) {
 			// be careful: strExternalFile has already been reversed, so op is the opposite!
-			if (strExternalFile.get(0).matches(".+\\.\\" + strExtension + "$")) {
+			if (strExternalFile.get(0).matches( strTriopsExtensionMatch )) {
 				((TextView) findViewById(R.id.btnAction)).setText(strBtnDecrypt);
 				((TextView) findViewById(R.id.btnAction)).getBackground().setColorFilter(colorDecryptBackground, PorterDuff.Mode.MULTIPLY);
 				// and show it:
@@ -626,7 +644,7 @@ public class MainActivity extends ActionBarActivity {
 				strExternalFile.size() > 1 ) {
 			int iCount = 0;
 			for (String file: strExternalFile) {
-				if ( file.matches(".+\\.\\" + strExtension + "$") ) {
+				if ( file.matches( strTriopsExtensionMatch ) ) {
 					iCount++;
 				}
 			}
@@ -742,7 +760,7 @@ public class MainActivity extends ActionBarActivity {
 				// 2. infer operation from file extension:
 				// .............................................
 				if (strExternalFile.size() == 1) {
-					if (strExternalFile.get(0).matches(".+\\.\\" + strExtension + "$")) {
+					if (strExternalFile.get(0).matches( strTriopsExtensionMatch )) {
 						((TextView) findViewById(R.id.btnAction)).setText(strBtnDecrypt);
 						((TextView) findViewById(R.id.btnAction)).getBackground().setColorFilter(colorDecryptBackground, PorterDuff.Mode.MULTIPLY);
 						// and show it:
@@ -756,7 +774,7 @@ public class MainActivity extends ActionBarActivity {
 				} else {
 					int iCrypt = 0, iDecrypt = 0;
 					for (String file : strExternalFile) {
-						if (file.matches(".+\\.\\" + strExtension + "$")) {
+						if (file.matches( strTriopsExtensionMatch )) {
 							iDecrypt++;
 						} else {
 							iCrypt++;
@@ -865,7 +883,7 @@ public class MainActivity extends ActionBarActivity {
 				strExternalPasswordFile.length() > 0 ) {
 			for (String file: strExternalFile) {
 				if ( file.length() > 0 &&
-						!file.matches(".+\\.\\" + strExtension + "$") &&
+						!file.matches( strTriopsExtensionMatch ) &&
 						file.equals(strExternalPasswordFile)
 						) {
 					strLogs += "\n\nWARNING:\n     WARNING:\n          WARNING:\n" +

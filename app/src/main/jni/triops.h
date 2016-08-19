@@ -13,7 +13,7 @@
 #define _FILE_OFFSET_BITS 64	// stat, fseek
 #define _LARGEFILE_SOURCE
 #define _LARGEFILE64_SOURCE		// off64_t for fseek64
-#define ZERO_LL 0LL				// crafted specially to be used in FSEEK( , , SEEK_END);
+#define ZERO_LL 0LL				// long long zero - crafted specially to be used in FSEEK( , , SEEK_END);
 // .................................................
 
 // .................................................
@@ -43,10 +43,26 @@
 #include <io.h>		 // _chsize_s, _open (LFS)
 #define FSEEK _fseeki64 // large file support in windows (LFS)
 #endif
+
 #include <string.h>
 #include <fcntl.h>  // open, etc.
-#ifndef WINDOWS_PLATFORM
-#include <unistd.h> // truncate
+
+#include <unistd.h> // getopt()
+#include <ctype.h>  // isprint()
+
+#ifndef __sun
+#include <getopt.h> // getopt() compatible with -std=c99
+#endif
+
+// sets binary mode for stdin in Windows
+#define STDIN 0
+#define STDOUT 1
+#ifdef _WIN32
+# include <io.h>
+# include <fcntl.h>
+# define SET_BINARY_MODE(handle) setmode(handle, O_BINARY)
+#else
+# define SET_BINARY_MODE(handle) ((void)0)
 #endif
 
 

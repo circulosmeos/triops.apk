@@ -22,7 +22,7 @@ public interface Constants {
 	String MP4=".mp4";
 	String RTF=".rtf";
 	String ZIP=".zip";
-	String TRIOPS=".+\\.\\$#.$"; // it'll be checked as a regexp
+	String TRIOPS=".+\\.(\\$#.|ooo)?$"; // it'll be checked as a regexp
 
 	String KEY_FILTER_FILES_EXTENSIONS="EXTENSIONS";
 	String KEY_FILE_SELECTED="FILE_SELECTED";

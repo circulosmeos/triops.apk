@@ -1,3 +1,9 @@
+v1.4
+
+* Upgrade to triops v9.0.   
+  Note that ".$#3" files are recognized, but new encrypted files will use ".ooo" as file extension.
+
+
 v1.3
 
 * Support for MultiWindow and drag-and-drop on Samsung's devices:

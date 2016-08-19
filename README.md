@@ -1,9 +1,9 @@
 triops.apk:   
 a simple Android tool for encryption/decryption of files.   
 
-Last version available and compiled is v1.3. Check [list of changes between versions](Changes.md).   
+Last version available and compiled is v1.4. Check [list of changes between versions](Changes.md).   
 
-apk available [https://github.com/circulosmeos/triops.apk/releases/download/v1.3/triops.apk](here):   
+apk available [https://github.com/circulosmeos/triops.apk/releases/download/v1.4/triops.apk](here):   
 [http://wp.me/p2FmmK-8T](http://wp.me/p2FmmK-8T)
 
 ![](https://circulosmeos.files.wordpress.com/2015/09/triops-apk1.png)
@@ -18,14 +18,14 @@ Features:
 * Files are (by default) encrypted/decrypted on-the-fly, so content is overwritten. This is interesting from a security point of view, as no clear content is left on disk.
 * When decrypting, if password is not the one used for encrypting, the process is aborted, so the file cannot be rendered unusable. This behaviour is achieved thanks to a password hint stored within the encrypted file.
 * Mentioned hint used to check that the password for decryption is correct is *not* the same used to encrypt (obviously!). Separate hashes are used for both purposes, though both are derived via different ways from the password and IV, using some 500-1000 concatenated KECCAK hashes.
-* Encrypted files are appended the extension .$#3 to filename, so they can be recognized.
+* Encrypted files are appended the extension .ooo to filename, so they can be recognized.
 * Password can be obtained from keyboard or from a file:
 * Binary files can be used as passwords: for example jpg images, etc. Caution: do not lose this 'password' file and do not modify it!   
 ![](https://circulosmeos.files.wordpress.com/2015/09/triops-apk-file_as_password.png)
 * Files bigger than 2 GiB can be managed.
 * Speed is extremely high: the app uses a native OS library and CHACHA20 is a very fast encryption algorithm: it is as fast as RC4.
-* Code for the Android file browser is a slightly modified version of ingyesid‘s [simple-file-chooser](https://github.com/ingyesid/simple-file-chooser).
-* Support for MultiWindow and drag-and-drop on Samsung's devices (file path text, via drag-n-drop Samsung's MultiWindow button).
+* Code for the Android file browser is a slightly modified version of ingyesid‘s [simple-file-chooser](https://github.com/ingyesid/simple-file-chooser): see [circulosmeos/simple-file-chooser](https://github.com/circulosmeos/simple-file-chooser).
+* Support for MultiWindow and drag-and-drop on Samsung's devices (file path text must be used, via drag-n-drop Samsung's MultiWindow button).
 * Licensed as [GPL v3](http://www.gnu.org/licenses/gpl-3.0.html)
 
 Known limitations:   
@@ -34,11 +34,14 @@ Known limitations:
    
    
    
-Please, refer to [triops](https://www.github.com/circulosmeos/triops) project for more details.
+Please, refer to [triops](https://www.github.com/circulosmeos/triops) command-line project for more details.
    
    
 
-Note:   
-* The sample encrypted file "gplv3.txt.$#3" can be decrypted with the password "triops!"   
+Notes:   
 
+* The sample encrypted file "gplv3.txt.ooo" can be decrypted with the password "triops!"   
+   
+* Files encrypted with version < 1.4 can be decrypted with greater versions, but in general files encrypted with version >=1.4 cannot be decrypted with previous versions. This is related to the change to cmdline triops's version >=9.0 : see [project notes here](https://github.com/circulosmeos/triops).   
 
+* Version < 1.4 used the extension ".#$3" for encrypted files. It has been changed to ".ooo", though those files are correctly recognized and managed. See previous note.   
