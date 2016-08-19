@@ -3,7 +3,7 @@ a simple Android tool for encryption/decryption of files.
 
 Last version available and compiled is v1.4. Check [list of changes between versions](Changes.md).   
 
-apk available [https://github.com/circulosmeos/triops.apk/releases/download/v1.4/triops.apk](here):   
+apk available [here](https://github.com/circulosmeos/triops.apk/releases/download/v1.4/triops.apk):   
 [http://wp.me/p2FmmK-8T](http://wp.me/p2FmmK-8T)
 
 ![](https://circulosmeos.files.wordpress.com/2015/09/triops-apk1.png)
