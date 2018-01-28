@@ -1,2 +1,0 @@
-configurations.create("default")
-artifacts.add("default", file('sdk-v1.0.0.jar'))

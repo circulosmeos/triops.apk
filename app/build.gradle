@@ -3,12 +3,12 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 22
-    buildToolsVersion '22.0.1'
+    buildToolsVersion '23.0.2'
     defaultConfig {
         applicationId "com.example.triops"
         minSdkVersion 7
         targetSdkVersion 22
-        versionName '1.4'
+        versionName '1.5'
         ndk {
             moduleName "com.example.triops"
         }
@@ -44,6 +44,4 @@ android {
 dependencies {
     compile 'com.android.support:support-v4:21.0.3'
     compile 'com.android.support:appcompat-v7:21.0.3'
-    compile project(':multiwindow-v1.2.6')
-    compile project(':sdk-v1.0.0')
 }

@@ -1,1 +1,1 @@
-include ':app', ':multiwindow-v1.2.6', ':sdk-v1.0.0'
+include ':app'

@@ -13,7 +13,7 @@
     <string name="filebrowser_name">File Browser</string>
     <string name="password">Password:</string>
     <string name="password_hint">password...</string>
-	<string name="initiallogtext">triops (v9.0) port to Android, version 1.4 (2016&#8211;08)\n  <a href ="https://wp.me/p2FmmK-8T">circulosmeos.wordpress.com</a>\n  <a href="https://github.com/circulosmeos/triops.apk">github.com/circulosmeos/triops.apk</a>\nlicensed under GNU General Public License <a href="http://www.gnu.org/licenses/gpl-3.0.en.html">(GPL) v3</a>.\n\nEncrypt and decrypt files \n  with <a href="https://en.wikipedia.org/wiki/Salsa20#ChaCha20_adoption">CHACHA20</a>+<a href="https://en.wikipedia.org/wiki/SHA-3#History">KECCAK</a>.\nOperation will be automagically inferred from file extension.\n\n</string>
+	<string name="initiallogtext">triops (v9.0) port to Android, version 1.5 (2018&#8211;01)\n  <a href ="https://wp.me/p2FmmK-8T">circulosmeos.wordpress.com</a>\n  <a href="https://github.com/circulosmeos/triops.apk">github.com/circulosmeos/triops.apk</a>\nlicensed under GNU General Public License <a href="http://www.gnu.org/licenses/gpl-3.0.en.html">(GPL) v3</a>.\n\nEncrypt and decrypt files \n  with <a href="https://en.wikipedia.org/wiki/Salsa20#ChaCha20_adoption">CHACHA20</a>+<a href="https://en.wikipedia.org/wiki/SHA-3#History">KECCAK</a>.\nOperation will be automagically inferred from file extension.\n\n</string>
 
     <string name="fileSize">File Size</string>
     <string name="currentDir">Current Dir</string>

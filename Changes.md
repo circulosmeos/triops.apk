@@ -1,3 +1,9 @@
+v1.5
+
+* Compatible with Android N (7):
+  Samsung's Multi-Window code removed as it is not compatible with Android N.
+
+
 v1.4
 
 * Upgrade to triops v9.0.   

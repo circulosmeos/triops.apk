@@ -20,7 +20,7 @@
 // Type './triops -h' to obtain command-line help.
 //
 // Pure C99 code,
-// by circulosmeos, May 2015. June 2015. July 2016. August 2016.
+// by circulosmeos, May 2015. June 2015. August 2016.
 // http://circulosmeos.wordpress.com
 // Licensed under GPL v3:
 //
@@ -209,9 +209,9 @@ int local_triops(int argc, char* const argv[static 5]);
 
 
 jint Java_com_example_triops_MainActivity_triops( JNIEnv*  env, jobject  thiz,  jcharArray jargv )
-{    //jargv is a Java array of Java strings
+{    
+	//jargv is a Java array of Java strings
 	int argc = (*env)->GetArrayLength( env, jargv );
-    //typedef char* pchar;
     char **argv = malloc(sizeof(char*)*(argc));
     int i;
     jint result;
@@ -1389,7 +1389,6 @@ print_help() {
 			"\t\tFile extension will be '%s' ('%s' for triops < v9.0)\n"
 			"\t\tOther algorithms could be available in the future.\n"
 			"\t-d : decrypt. This is the default action.\n"
-			"\t\tDecryption is guessed from file contents.\n"
 			"\t-H : do not store password hint when encrypting\n"
 			"\t\tNote that this way, an incorrect decryption password\n"
 			"\t\twith data overwrting, will render the file unusable.\n"
