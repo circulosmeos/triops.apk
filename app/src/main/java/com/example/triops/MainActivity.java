@@ -224,14 +224,14 @@ public class MainActivity extends ActionBarActivity {
 		// 1. check that there's a password, and that it's acceptable:
 		// .............................................
 		if ( ! bPasswordMethodFile ) {
-			if (!strPassword.matches("^[\\w\\.\\[\\]\\{\\}\\-!#$%&/()=?^*\\{\\},;:@+]+$")) {
+			/*if (!strPassword.matches("^[\\w\\.\\[\\]\\{\\}\\-!#$%&/()=?^*\\{\\},;:@+]+$")) {
 				Toast.makeText(
 						this,
 						"Password contains invalid characters!",
 						Toast.LENGTH_LONG
 				).show();
 				return;
-			} /*else {
+			}*/ /*else {
 				if ( strPassword.matches("^__$") ) {
 					Toast.makeText(
 							this,

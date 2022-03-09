@@ -8,7 +8,7 @@ android {
         applicationId "com.example.triops"
         minSdkVersion 7
         targetSdkVersion 22
-        versionName '1.5'
+        versionName '1.6'
         ndk {
             moduleName "com.example.triops"
         }
