@@ -3,9 +3,9 @@ triops.apk
 
 A simple Android tool for encryption/decryption of files.   
 
-Last version available and compiled is v1.5. Check [list of changes between versions](Changes.md).   
+Last version available and compiled is v1.7. Check [list of changes between versions](Changes.md).   
 
-apk available [here](https://github.com/circulosmeos/triops.apk/releases/download/v1.5/triops.apk):   
+apk available [here](https://github.com/circulosmeos/triops.apk/releases/download/v1.7/triops.apk):   
 [http://wp.me/p2FmmK-8T](http://wp.me/p2FmmK-8T)
 
 ![](https://circulosmeos.files.wordpress.com/2015/09/triops-apk1.png)
@@ -31,11 +31,6 @@ Features
 * Support for MultiWindow and drag-and-drop on Samsung's devices (file path text must be used, via drag-n-drop Samsung's MultiWindow button).
 * Licensed as [GPL v3](http://www.gnu.org/licenses/gpl-3.0.html)
 
-Known limitations
-=================
-
-* Original file modification time is not maintained in Android as it is on cmdline tool, due to [some platform inherent problems](https://code.google.com/p/android/issues/detail?id=18624).
-   
 
 Additional info
 ===============   

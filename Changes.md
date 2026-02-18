@@ -1,3 +1,19 @@
+v1.7
+
+* Adapted to targetSdkVersion 34 (Android 14) and above, and:
+  · Programmed share with this app
+  · Programmed open *.* with this app
+  · Added human readable size and modified date to file explorer
+
+
+v1.6
+
+* All chars are accepted as valid password chars instead of restricting
+  to pipe-safe-chars as in previous versions.
+  Please, note that Unicode chars in Android *may not* be interpreted the
+  same way as in other platforms: bear this in mind when cross-decrypting
+  between platforms!
+
 v1.5
 
 * Compatible with Android N (7):
