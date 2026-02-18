@@ -17,6 +17,7 @@ It is based on command-line tool triops, available [here](https://www.github.com
 Features
 ======== 
 
+* Support for "share with" and "open with" (*.*) Android behaviours.
 * Same content produces different encrypted outputs every time. This is attained with a random initialization vector (IV) stored within the encrypted file.
 * Files are (by default) encrypted/decrypted on-the-fly, so content is overwritten. This is interesting from a security point of view, as no clear content is left on disk.
 * When decrypting, if password is not the one used for encrypting, the process is aborted, so the file cannot be rendered unusable. This behaviour is achieved thanks to a password hint stored within the encrypted file.
@@ -28,7 +29,6 @@ Features
 * Files bigger than 2 GiB can be managed.
 * Speed is extremely high: the app uses a native OS library and CHACHA20 is a very fast encryption algorithm: it is as fast as RC4.
 * Code for the Android file browser is a slightly modified version of ingyesid‘s [simple-file-chooser](https://github.com/ingyesid/simple-file-chooser): see [circulosmeos/simple-file-chooser](https://github.com/circulosmeos/simple-file-chooser).
-* Support for MultiWindow and drag-and-drop on Samsung's devices (file path text must be used, via drag-n-drop Samsung's MultiWindow button).
 * Licensed as [GPL v3](http://www.gnu.org/licenses/gpl-3.0.html)
 
 

@@ -14,6 +14,7 @@ v1.6
   same way as in other platforms: bear this in mind when cross-decrypting
   between platforms!
 
+
 v1.5
 
 * Compatible with Android N (7):
