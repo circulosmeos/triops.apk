@@ -8,14 +8,12 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.example.triops.MainActivity" >
+    tools:context="com.example.triops3.MainActivity" >
 
     <TextView
         android:id="@+id/tvwInfoHeader"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignStart="@+id/tvwPassword"
-        android:layout_alignLeft="@+id/tvwPassword"
         android:layout_alignParentTop="true"
         android:layout_alignEnd="@+id/svw_log_scroller"
         android:layout_alignRight="@+id/svw_log_scroller"
@@ -27,9 +25,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/tvwInfoHeader"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_toLeftOf="@+id/textView"
-        android:layout_toStartOf="@+id/textView">
+        android:layout_alignParentStart="true">
 
         <TextView
             android:id="@+id/tvwPassword"
@@ -45,7 +41,6 @@
             android:id="@+id/edtPassword"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/tvwInfoHeader"
             android:layout_toRightOf="@+id/tvwPassword"
             android:layout_toEndOf="@+id/tvwPassword"
             android:ems="9"

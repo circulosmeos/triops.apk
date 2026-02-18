@@ -1,47 +1,85 @@
-import org.apache.tools.ant.taskdefs.condition.Os
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 22
-    buildToolsVersion '23.0.2'
+    namespace = 'com.example.triops' // Move applicationId here if possible, or just define namespace
+    compileSdk 34 // Changed from compileSdkVersion
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
     defaultConfig {
         applicationId "com.example.triops"
-        minSdkVersion 7
-        targetSdkVersion 22
-        versionName '1.6'
+        minSdkVersion 24
+        targetSdkVersion 34
+        versionCode 3
+        versionName '1.7'
+        signingConfig = signingConfigs.my_release_key
+        // This tells the NDK Compiler what to actually BUILD
         ndk {
-            moduleName "com.example.triops"
+            abiFilters 'arm64-v8a'
+        }
+        externalNativeBuild {
+            ndkBuild {
+                // We force the creation of both 32-bit and 64-bit libraries
+                arguments "APP_ABI=arm64-v8a",
+                        "APP_PLATFORM=android-24",
+                        "APP_CFLAGS+=-D_FILE_OFFSET_BITS=64"
+            }
         }
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            signingConfig = signingConfigs.my_release_key
         }
         debug {
+            signingConfig = signingConfigs.my_release_key
             jniDebuggable true
         }
     }
+
+    // We keep this to ensure libs are found, but removed the jni.srcDirs hack
+    /*
     sourceSets.main {
-        jniLibs.srcDir 'src/main/libs' //set libs as .so's location instead of jniLibs
-        jni.srcDirs = [] //disable automatic ndk-build call with auto-generated Android.mk
+        jniLibs.srcDir 'src/main/libs'
     }
-    // call regular ndk-build(.cmd) script from app directory
-    task ndkBuild(type: Exec) {
-        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-            commandLine 'ndk-build.cmd', '-C', file('src/main').absolutePath
-        } else {
-            commandLine 'ndk-build', '-C', file('src/main').absolutePath
+     */
+
+    // Define the NDK version
+    ndkVersion = "29.0.14206865"
+
+    // Link the build file
+    externalNativeBuild {
+        ndkBuild {
+            path 'src/main/jni/Android.mk'
         }
     }
-    tasks.withType(JavaCompile) {
-        compileTask -> compileTask.dependsOn ndkBuild
-    }
-    productFlavors {
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
     }
 }
 
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs.addAll(["-Xlint:deprecation", "-Xlint:unchecked"])
+}
+
 dependencies {
-    compile 'com.android.support:support-v4:21.0.3'
-    compile 'com.android.support:appcompat-v7:21.0.3'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.core:core-ktx:1.10.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+
+    // This tells Gradle to treat the old split Kotlin libraries as the new unified one.
+    constraints {
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0") {
+            because("kotlin-stdlib-jdk7 is now a part of kotlin-stdlib")
+        }
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0") {
+            because("kotlin-stdlib-jdk8 is now a part of kotlin-stdlib")
+        }
+    }
 }

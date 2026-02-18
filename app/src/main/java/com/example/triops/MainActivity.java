@@ -1,5 +1,4 @@
 package com.example.triops;
-
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.Intent;
@@ -7,10 +6,19 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.Looper; // Needed for the deprecation fix (Handler h = new Handler();)
+import android.graphics.PorterDuffColorFilter; // Needed for the deprecation fix (Handler h = new Handler();)
+import android.provider.Settings;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Handler;
-import android.support.v4.app.FragmentActivity;
-import android.support.v7.app.ActionBarActivity;
+import androidx.fragment.app.FragmentActivity;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.core.content.IntentCompat;
+import android.app.Activity;
 import android.text.InputType;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
@@ -34,7 +42,7 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends androidx.appcompat.app.AppCompatActivity {
 
 	private final String strBtnDecrypt="decrypt";
 	private final String strBtnEncrypt="crypt !";
@@ -46,9 +54,6 @@ public class MainActivity extends ActionBarActivity {
 	private final String strTriopsGenericExtension="ooo"; // triops v>=9.0
 	private final String strTriopsExtensionMatch=".+\\.(\\$#3|ooo)$"; 	  // triops v<9.0 && triops v>=9.0
 	private String strParameterForEncrypting="3"; // triops' default encrypting scheme 
-
-	private final int REQUEST_CODE_GET_PASSWORD_FILE = 1;
-	private final int REQUEST_CODE_GET_FILE_TO_OVERWRITE = 2;
 
 	/****************************
 	 	usgin logs on Activity
@@ -77,20 +82,27 @@ public class MainActivity extends ActionBarActivity {
 	// predefinition of JNI (external) method
 	//public native int triops(int argc, String[] argv);
 	public native int triops(String[] argv); // triops
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		// secure window against automatic screenshots from the recent-tasks history.
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE,
+				WindowManager.LayoutParams.FLAG_SECURE);
+
 		setContentView(R.layout.activity_main);
+
+        requestFilePermission();
 
 		tvwLog = (TextView)findViewById(R.id.tvw_log_text);
     	svwLog = (ScrollView)findViewById(R.id.svw_log_scroller);
     	strLogs = getResources().getString(R.string.initiallogtext);
 
 		// set color for btnAction by code: this way the button do not loose its "button" feeling:
-		((TextView)findViewById(R.id.btnAction)).getBackground().setColorFilter(colorEncryptBackground, PorterDuff.Mode.MULTIPLY);
+        ((TextView) findViewById(R.id.btnAction)).getBackground().setColorFilter(new PorterDuffColorFilter(colorEncryptBackground, PorterDuff.Mode.MULTIPLY));
 
-		// set icon in toolbar:
+
+        // set icon in toolbar:
 		getSupportActionBar().setDisplayShowHomeEnabled(true);
 		getSupportActionBar().setIcon(R.drawable.ic_launcher);
 
@@ -98,8 +110,151 @@ public class MainActivity extends ActionBarActivity {
 		tvwLog.setMovementMethod(LinkMovementMethod.getInstance());
 		// this will last just until next tvwLog modification ! Enough.
 
+        // Check if the activity was started by clicking a file
+        Intent intent = getIntent();
+        handleIntent(intent);
+
 	}
 
+    // handle updates while app is open
+    @Override
+    protected void onNewIntent(android.content.Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        handleIntent(intent);
+    }
+
+    private void handleIntent(android.content.Intent intent) {
+        String action = intent.getAction();
+        String type = intent.getType();
+
+        if (type != null) {
+            if (Intent.ACTION_VIEW.equals(action) || Intent.ACTION_SEND.equals(action)) {
+                handleIncomingFile(intent);
+            } else if (Intent.ACTION_SEND_MULTIPLE.equals(action)) {
+                handleIncomingMultipleFiles(intent);
+            }
+        }
+    }
+
+    private void handleIncomingFile(Intent intent) {
+        // Try to get URI from Data (VIEW action) or Extra (SEND action)
+        android.net.Uri fileUri = intent.getData();
+        if (fileUri == null) {
+            fileUri = IntentCompat.getParcelableExtra(intent, Intent.EXTRA_STREAM, android.net.Uri.class);
+        }
+
+        if (fileUri != null) {
+            //Log.d("Triops", "File received URI: " + fileUri.toString());
+
+            if (strExternalFile == null) {
+                strExternalFile = new ArrayList<>();
+            }
+
+            // --- RESOLVE URI TO PHYSICAL PATH ---
+            String realPath = getFilePathFromUri(fileUri);
+
+            if (realPath != null) {
+                strExternalFile.clear(); // Clear previous selection
+                strExternalFile.add(realPath);
+
+                // Update UI to show filename
+                String filename = new java.io.File(realPath).getName();
+                ((TextView)findViewById(R.id.tvwInfo)).setText(filename);
+
+                //Log.d("Triops", "Resolved Physical Path: " + realPath);
+
+                // show file:
+                updateActivitywithListOfFiles();
+            } else {
+                Toast.makeText(this, "Could not resolve file path", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void handleIncomingMultipleFiles(Intent intent) {
+        // ACTION_SEND_MULTIPLE uses EXTRA_STREAM to provide an ArrayList of URIs
+        ArrayList<android.net.Uri> fileUris = IntentCompat.getParcelableArrayListExtra(intent, Intent.EXTRA_STREAM, android.net.Uri.class);
+
+        if (fileUris != null) {
+            if (strExternalFile == null) {
+                strExternalFile = new ArrayList<>();
+            }
+            strExternalFile.clear();
+
+            for (android.net.Uri uri : fileUris) {
+                // Resolve each individual URI in the list
+                String realPath = getFilePathFromUri(uri);
+                if (realPath != null) {
+                    strExternalFile.add(realPath);
+                }
+            }
+
+            if (!strExternalFile.isEmpty()) {
+                if (strExternalFile.size() == 1) {
+                    // If only one file was shared via the multiple-selection menu
+                    String filename = new java.io.File(strExternalFile.get(0)).getName();
+                    ((TextView)findViewById(R.id.tvwInfo)).setText(filename);
+                } else {
+                    // Show "Multiple files selected" string
+                    ((TextView)findViewById(R.id.tvwInfo)).setText(MULTIPLE_FILES_SELECTED);
+                }
+
+                // show files:
+                updateActivitywithListOfFiles();
+            } else {
+                Toast.makeText(this, "Could not resolve any of the shared file paths", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    /**
+     * Helper to resolve content:// URIs to physical file paths.
+     * Since you have MANAGE_EXTERNAL_STORAGE, this works for most file managers.
+     */
+    private String getFilePathFromUri(android.net.Uri uri) {
+        String path = null;
+        if ("content".equalsIgnoreCase(uri.getScheme())) {
+            String[] projection = { "_data" };
+            android.database.Cursor cursor = null;
+            try {
+                cursor = getContentResolver().query(uri, projection, null, null, null);
+                if (cursor != null && cursor.moveToFirst()) {
+                    int columnIndex = cursor.getColumnIndexOrThrow("_data");
+                    path = cursor.getString(columnIndex);
+                }
+            } catch (Exception e) {
+                //Log.e("Triops", "Error resolving URI", e);
+            } finally {
+                if (cursor != null) cursor.close();
+            }
+        } else if ("file".equalsIgnoreCase(uri.getScheme())) {
+            path = uri.getPath();
+        }
+        return path;
+    }
+
+    private void requestFilePermission() {
+        // Only for Android 11 (API 30) and above
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // Check if permission has already been granted
+            if (!Environment.isExternalStorageManager()) {
+                try {
+                    // Create an intent to open the file permission management screen
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+                    intent.addCategory("android.intent.category.DEFAULT");
+                    // Point to the specific configuration of this app
+                    intent.setData(android.net.Uri.parse(String.format("package:%s", getApplicationContext().getPackageName())));
+                    startActivity(intent);
+                } catch (Exception e) {
+                    // If failed, open the general configuration
+                    Intent intent = new Intent();
+                    intent.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                    startActivity(intent);
+                }
+            }
+        }
+    }
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -107,8 +262,6 @@ public class MainActivity extends ActionBarActivity {
 		return true;
 	}
 
-
-	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
 		if (id == R.id.action_settings) {
@@ -143,8 +296,8 @@ public class MainActivity extends ActionBarActivity {
 
 		// in order to overwrite the screen capture of the task with
 		// this empty state, let's wait some time before closing:
-		Handler h = new Handler();
-		h.postDelayed(new Runnable() {
+        Handler h = new Handler(android.os.Looper.getMainLooper());
+        h.postDelayed(new Runnable() {
 			@Override
 			public void run() {
 				triops_exit();
@@ -206,6 +359,7 @@ public class MainActivity extends ActionBarActivity {
 		FILE_OPERATION operation;
 		String strPassword;
 		String[] strCommand;
+
 		ArrayList<String> filesOperated = new ArrayList<String>();
 		boolean bError = false;
 		int iCommandReturnedValue;
@@ -303,7 +457,7 @@ public class MainActivity extends ActionBarActivity {
 				strCommand = new String[5];
 			}
 			// we're gonna fake a command line operation with argc + *argv[]:
-			strCommand[0]="triops"; // first parameter is "executable" name, so, here: any value.
+			strCommand[0]="triops"; // first parameter is "executable" name. It is checked in .c !
 			if ( ! bPasswordMethodFile ) {
 				strCommand[3] = "-p";
 				strCommand[4] = strPassword;
@@ -335,6 +489,7 @@ public class MainActivity extends ActionBarActivity {
 				} else {
 					strLogs += "\n\nERROR decrypting:\n";
 				}
+				strLogs += "(" + Integer.toString(iCommandReturnedValue) + ")\n";
 				strLogs += file + "\n\n";
 				showLogs();
 			} else {
@@ -387,7 +542,7 @@ public class MainActivity extends ActionBarActivity {
 				((TextView) findViewById(R.id.tvwInfo)).setText(R.string.info_choose_file);
 				// to default state (crypt):
 				((TextView) findViewById(R.id.btnAction)).setText(strBtnEncrypt);
-				((TextView) findViewById(R.id.btnAction)).getBackground().setColorFilter(colorEncryptBackground, PorterDuff.Mode.MULTIPLY);
+                ((TextView) findViewById(R.id.btnAction)).getBackground().setColorFilter(new PorterDuffColorFilter(colorEncryptBackground, PorterDuff.Mode.MULTIPLY));
 			}
 		}
 		// in case of just one file selected, update GUI for reversible op:
@@ -396,12 +551,12 @@ public class MainActivity extends ActionBarActivity {
 			// be careful: strExternalFile has already been reversed, so op is the opposite!
 			if (strExternalFile.get(0).matches( strTriopsExtensionMatch )) {
 				((TextView) findViewById(R.id.btnAction)).setText(strBtnDecrypt);
-				((TextView) findViewById(R.id.btnAction)).getBackground().setColorFilter(colorDecryptBackground, PorterDuff.Mode.MULTIPLY);
+                ((TextView) findViewById(R.id.btnAction)).getBackground().setColorFilter(new PorterDuffColorFilter(colorDecryptBackground, PorterDuff.Mode.MULTIPLY));
 				// and show it:
 				strLogs += "next action: DECRYPT\non:\n" + extractFilename(strExternalFile.get(0)) + "\n\n";
 			} else {
 				((TextView) findViewById(R.id.btnAction)).setText(strBtnEncrypt);
-				((TextView) findViewById(R.id.btnAction)).getBackground().setColorFilter(colorEncryptBackground, PorterDuff.Mode.MULTIPLY);
+                ((TextView) findViewById(R.id.btnAction)).getBackground().setColorFilter(new PorterDuffColorFilter(colorEncryptBackground, PorterDuff.Mode.MULTIPLY));
 				// and show it:
 				strLogs += "next action: CRYPT\non:\n" + extractFilename(strExternalFile.get(0)) + "\n\n";
 			}
@@ -419,15 +574,17 @@ public class MainActivity extends ActionBarActivity {
 			}
 			if ( iCount == strExternalFile.size() ) {
 				((TextView) findViewById(R.id.btnAction)).setText(strBtnDecrypt);
-				((TextView) findViewById(R.id.btnAction)).getBackground().setColorFilter(colorDecryptBackground, PorterDuff.Mode.MULTIPLY);
+                ((TextView) findViewById(R.id.btnAction)).getBackground().setColorFilter(new PorterDuffColorFilter(colorDecryptBackground, PorterDuff.Mode.MULTIPLY));
 				// and show it:
 				strLogs += "\nnext action: DECRYPT\n\n";
 			} else if (iCount == 0) {
 				((TextView) findViewById(R.id.btnAction)).setText(strBtnEncrypt);
-				((TextView) findViewById(R.id.btnAction)).getBackground().setColorFilter(colorEncryptBackground, PorterDuff.Mode.MULTIPLY);
+                ((TextView) findViewById(R.id.btnAction)).getBackground().setColorFilter(new PorterDuffColorFilter(colorEncryptBackground, PorterDuff.Mode.MULTIPLY));
 				// and show it:
 				strLogs += "\nnext action: CRYPT\n\n";
-			}
+			} else {
+                strLogs += "\n";
+            }
 		}
 
 		showLogs();
@@ -452,10 +609,8 @@ public class MainActivity extends ActionBarActivity {
 					extractPath(strExternalPasswordFile)
 			);
 		}
-		startActivityForResult(
-				fileExploreIntent,
-				REQUEST_CODE_GET_PASSWORD_FILE
-		);
+
+        passwordFileLauncher.launch(fileExploreIntent);
 	}
 
 	// select file to encrypt/decrypt
@@ -478,141 +633,161 @@ public class MainActivity extends ActionBarActivity {
 				Constants.KEY_SHOW_CHECKBOXES_FOR_FILES
 		);
 
-		startActivityForResult(
-				fileExploreIntent,
-				REQUEST_CODE_GET_FILE_TO_OVERWRITE
-		);
+        targetFileLauncher.launch(fileExploreIntent);
 	}
 
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-	    if (requestCode == REQUEST_CODE_GET_FILE_TO_OVERWRITE) {
-			if(resultCode == RESULT_OK) {
-				// implements checkable items
-				ArrayList<String> list_of_selected_files = null;
-				try {
-					list_of_selected_files =
-							(ArrayList<String>) data.getStringArrayListExtra(Constants.KEY_FILE_SELECTED);
-				} catch (NullPointerException e) {
-					// This code should never be reached:
-					// there hasn't been any file selected,
-					// so exit now to maintain previous selections
-					return;
-				}
-				// set file name:
-				if (list_of_selected_files != null) {
-					strExternalFile = list_of_selected_files;
-				} else {
-					// This code should never be reached:
-					// there hasn't been any file selected,
-					// so exit now to maintain previous selections
-					return;
-				}
+    // Read path of password file to use as password
+    private final ActivityResultLauncher<Intent> passwordFileLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    Intent data = result.getData();
 
-				// update Activity:
-				// .............................................
-				// 1. show selected filename(s)
-				// .............................................
-				if (strExternalFile.size() == 1) {
-					((TextView) findViewById(R.id.tvwInfo)).setText(strExternalFile.get(0));
-					strLogs += strExternalFile.get(0) + "\n";
-				} else {
-					((TextView) findViewById(R.id.tvwInfo)).setText(MULTIPLE_FILES_SELECTED);
-					// first, extract and show path
-					strLogs += "\nIn folder\n\t" + extractPath(strExternalFile.get(0)) + "\nyou've selected:\n";
-					for (String file : strExternalFile) {
-						strLogs += "\t" + extractFilename(file) + "\n";
-					}
-				}
+                    if (data.hasExtra(Constants.KEY_FILE_SELECTED)) {
+                        ArrayList<String> files = data.getStringArrayListExtra(Constants.KEY_FILE_SELECTED);
+                        if (files != null && !files.isEmpty()) {
+                            // set file name:
+                            strExternalPasswordFile = files.get(0);
+                            /*Toast.makeText(
+                                this,
+                                "Received file name from file browser:"+strExternalPasswordFile,
+                                Toast.LENGTH_LONG
+                            ).show();*/
 
-				// .............................................
-				// 2. infer operation from file extension:
-				// .............................................
-				if (strExternalFile.size() == 1) {
-					if (strExternalFile.get(0).matches( strTriopsExtensionMatch )) {
-						((TextView) findViewById(R.id.btnAction)).setText(strBtnDecrypt);
-						((TextView) findViewById(R.id.btnAction)).getBackground().setColorFilter(colorDecryptBackground, PorterDuff.Mode.MULTIPLY);
-						// and show it:
-						strLogs += "Action: DECRYPT\n";
-					} else {
-						((TextView) findViewById(R.id.btnAction)).setText(strBtnEncrypt);
-						((TextView) findViewById(R.id.btnAction)).getBackground().setColorFilter(colorEncryptBackground, PorterDuff.Mode.MULTIPLY);
-						// and show it:
-						strLogs += "Action: CRYPT\n";
-					}
-				} else {
-					int iCrypt = 0, iDecrypt = 0;
-					for (String file : strExternalFile) {
-						if (file.matches( strTriopsExtensionMatch )) {
-							iDecrypt++;
-						} else {
-							iCrypt++;
-						}
-					}
-					if (iCrypt==0 && iDecrypt!=0) {
-						((TextView) findViewById(R.id.btnAction)).setText(strBtnDecrypt);
-						((TextView) findViewById(R.id.btnAction)).getBackground().setColorFilter(colorDecryptBackground, PorterDuff.Mode.MULTIPLY);
-						strLogs += "\nAction: " + Integer.toString(iDecrypt) + " DECRYPTs\n";
-					}
-					else if (iDecrypt==0 && iCrypt!=0) {
-						((TextView) findViewById(R.id.btnAction)).setText(strBtnEncrypt);
-						((TextView) findViewById(R.id.btnAction)).getBackground().setColorFilter(colorEncryptBackground, PorterDuff.Mode.MULTIPLY);
-						strLogs += "\nAction: " + Integer.toString(iCrypt) + " CRYPTs\n";
-					}
-					else {
-						strLogs += "\nActions: " + Integer.toString(iCrypt) + " CRYPTs and " + Integer.toString(iDecrypt) + " DECRYPTs\n";
-						((TextView) findViewById(R.id.btnAction)).setText(strBtnProceed);
-						((TextView) findViewById(R.id.btnAction)).getBackground().setColorFilter(colorProceedBackground, PorterDuff.Mode.MULTIPLY);
-					}
-					showLogs();
-				}
-				// special case check:
-				special_case_warning();
-				// show this to proceed:
-				strLogs += "\n\nClick on button to proceed...\n";
-				showLogs();
+                            // update Activity:
+                            if (!strExternalPasswordFile.equals("")) {
+                                ((TextView) findViewById(R.id.tvwPasswordFile)).setText(extractFilename(strExternalPasswordFile));
+                            }
 
-			} else {//if(resultCode == this.RESULT_OK) {
-				Toast.makeText(
-					this,
-					"Received NO result from file browser",
-					Toast.LENGTH_LONG)
-				.show();
-			}//END } else {//if(resultCode == this.RESULT_OK) {
-		}
-		if (requestCode == REQUEST_CODE_GET_PASSWORD_FILE) {
-			if(resultCode == RESULT_OK) {
-				// set file name:
-				strExternalPasswordFile = data.getStringArrayListExtra(
-						Constants.KEY_FILE_SELECTED).get(0);
-				/*Toast.makeText(
-					this,
-					"Received file name from file browser:"+strExternalPasswordFile,
-					Toast.LENGTH_LONG
-				).show();*/
+                            // special case check:
+                            special_case_warning();
 
-				// update Activity:
-				if (!strExternalPasswordFile.equals("")) {
-					((TextView)findViewById(R.id.tvwPasswordFile)).setText(strExternalPasswordFile);
-				}
+                            // and show it:
+                            strLogs += "\nUsing this file as password:\n" + strExternalPasswordFile + "\n";
+                            showLogs();
+                        }
+                    }
+                } else {
+                    Toast.makeText(
+                        this,
+                        "Received NO result from file browser",
+                        Toast.LENGTH_LONG)
+                        .show();
+                }
+            }
+    );
 
-				// special case check:
-				special_case_warning();
+    // Read path of file(s) to be encripted
+    private final ActivityResultLauncher<Intent> targetFileLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    Intent data = result.getData();
 
-				// and show it:
-				strLogs += "\nUsing this file as password:\n" + strExternalPasswordFile + "\n";
-				showLogs();
+                    if (data.hasExtra(Constants.KEY_FILE_SELECTED)) {
+                        strExternalFile = data.getStringArrayListExtra(Constants.KEY_FILE_SELECTED);
 
-			} else {//if(resultCode == this.RESULT_OK) {
-				Toast.makeText(
-						this,
-						"Received NO result from file browser",
-						Toast.LENGTH_LONG)
-						.show();
-			}//END } else {//if(resultCode == this.RESULT_OK) {
-		}
-		super.onActivityResult(requestCode, resultCode, data);
-	}
+                        if (strExternalFile != null && !strExternalFile.isEmpty()) {
+
+                            // implements checkable items
+                            ArrayList<String> list_of_selected_files = null;
+                            try {
+                                list_of_selected_files =
+                                        (ArrayList<String>) data.getStringArrayListExtra(Constants.KEY_FILE_SELECTED);
+                            } catch (NullPointerException e) {
+                                // This code should never be reached:
+                                // there hasn't been any file selected,
+                                // so exit now to maintain previous selections
+                                return;
+                            }
+                            // set file name:
+                            if (list_of_selected_files != null) {
+                                strExternalFile = list_of_selected_files;
+                            } else {
+                                // This code should never be reached:
+                                // there hasn't been any file selected,
+                                // so exit now to maintain previous selections
+                                return;
+                            }
+
+                            updateActivitywithListOfFiles();
+
+                        }
+                    }
+                } else {
+                    Toast.makeText(
+                        this,
+                        "Received NO result from file browser",
+                        Toast.LENGTH_LONG)
+                        .show();
+                }
+            }
+    );
+
+    private void updateActivitywithListOfFiles() {
+        // update Activity:
+        // .............................................
+        // 1. show selected filename(s)
+        // .............................................
+        if (strExternalFile.size() == 1) {
+            ((TextView) findViewById(R.id.tvwInfo)).setText(strExternalFile.get(0));
+            strLogs += "\n\n" + strExternalFile.get(0) + "\n";
+        } else {
+            ((TextView) findViewById(R.id.tvwInfo)).setText(MULTIPLE_FILES_SELECTED);
+            // first, extract and show path
+            strLogs += "\n\nIn folder\n\t" + extractPath(strExternalFile.get(0)) + "\nyou've selected:\n";
+            for (String file : strExternalFile) {
+                strLogs += "\t" + extractFilename(file) + "\n";
+            }
+        }
+
+        // .............................................
+        // 2. infer operation from file extension:
+        // .............................................
+        if (strExternalFile.size() == 1) {
+            if (strExternalFile.get(0).matches( strTriopsExtensionMatch )) {
+                ((TextView) findViewById(R.id.btnAction)).setText(strBtnDecrypt);
+                ((TextView) findViewById(R.id.btnAction)).getBackground().setColorFilter(new PorterDuffColorFilter(colorDecryptBackground, PorterDuff.Mode.MULTIPLY));
+                // and show it:
+                strLogs += "Action: DECRYPT\n";
+            } else {
+                ((TextView) findViewById(R.id.btnAction)).setText(strBtnEncrypt);
+                ((TextView) findViewById(R.id.btnAction)).getBackground().setColorFilter(new PorterDuffColorFilter(colorEncryptBackground, PorterDuff.Mode.MULTIPLY));
+                // and show it:
+                strLogs += "Action: CRYPT\n";
+            }
+        } else {
+            int iCrypt = 0, iDecrypt = 0;
+            for (String file : strExternalFile) {
+                if (file.matches( strTriopsExtensionMatch )) {
+                    iDecrypt++;
+                } else {
+                    iCrypt++;
+                }
+            }
+            if (iCrypt==0 && iDecrypt!=0) {
+                ((TextView) findViewById(R.id.btnAction)).setText(strBtnDecrypt);
+                ((TextView) findViewById(R.id.btnAction)).getBackground().setColorFilter(new PorterDuffColorFilter(colorDecryptBackground, PorterDuff.Mode.MULTIPLY));
+                strLogs += "\nAction: " + Integer.toString(iDecrypt) + " DECRYPTs\n";
+            }
+            else if (iDecrypt==0 && iCrypt!=0) {
+                ((TextView) findViewById(R.id.btnAction)).setText(strBtnEncrypt);
+                ((TextView) findViewById(R.id.btnAction)).getBackground().setColorFilter(new PorterDuffColorFilter(colorEncryptBackground, PorterDuff.Mode.MULTIPLY));
+                strLogs += "\nAction: " + Integer.toString(iCrypt) + " CRYPTs\n";
+            }
+            else {
+                strLogs += "\nActions: " + Integer.toString(iCrypt) + " CRYPTs and " + Integer.toString(iDecrypt) + " DECRYPTs\n";
+                ((TextView) findViewById(R.id.btnAction)).setText(strBtnProceed);
+                ((TextView) findViewById(R.id.btnAction)).getBackground().setColorFilter(new PorterDuffColorFilter(colorProceedBackground, PorterDuff.Mode.MULTIPLY));
+            }
+            showLogs();
+        }
+        // special case check:
+        special_case_warning();
+        // show this to proceed:
+        strLogs += "\n\nClick on button to proceed...\n";
+        showLogs();
+    }
+
 	/**************************************
 	 	END of file browser integration with
 	 https://github.com/ingyesid/simple-file-chooser
