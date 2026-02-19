@@ -5,8 +5,7 @@ A simple Android tool for encryption/decryption of files.
 
 Last version available and compiled is v1.7. Check [list of changes between versions](Changes.md).   
 
-apk available [here](https://github.com/circulosmeos/triops.apk/releases/download/v1.7/triops.apk):   
-[http://wp.me/p2FmmK-8T](http://wp.me/p2FmmK-8T)
+apk available here [in project releases](https://github.com/circulosmeos/triops.apk/releases/download/v1.7/triops.apk).   
 
 ![](https://circulosmeos.files.wordpress.com/2015/09/triops-apk1.png)
 
@@ -14,10 +13,12 @@ It uses [CHACHA20](http://en.wikipedia.org/wiki/Salsa20#ChaCha_variant) as algor
 
 It is based on command-line tool triops, available [here](https://www.github.com/circulosmeos/triops). The C code is exactly the same, used via JNI, with just a GUI frontend for Android.   
 
+You can also find info about the development of the app here: [http://wp.me/p2FmmK-8T](http://wp.me/p2FmmK-8T).   
+
 Features
 ======== 
 
-* Support for "share with" and "open with" (*.*) Android behaviours.
+* Support for "share with" and "open with" (\*.\*) Android behaviours: this means that you can use your favorite Android's file explorer, select one or more files within it, and "share" (or "open \*.\*" with) them with this app in order to crypt or decrypt them (you can mix file types with no problem), and the app will shown waiting just for the password.
 * Same content produces different encrypted outputs every time. This is attained with a random initialization vector (IV) stored within the encrypted file.
 * Files are (by default) encrypted/decrypted on-the-fly, so content is overwritten. This is interesting from a security point of view, as no clear content is left on disk.
 * When decrypting, if password is not the one used for encrypting, the process is aborted, so the file cannot be rendered unusable. This behaviour is achieved thanks to a password hint stored within the encrypted file.
@@ -26,6 +27,7 @@ Features
 * Password can be obtained from keyboard or from a file:
 * Binary files can be used as passwords: for example jpg images, etc. Caution: do not lose this 'password' file and do not modify it!   
 ![](https://circulosmeos.files.wordpress.com/2015/09/triops-apk-file_as_password.png)
+* Original date & time of the files are preserved.
 * Files bigger than 2 GiB can be managed.
 * Speed is extremely high: the app uses a native OS library and CHACHA20 is a very fast encryption algorithm: it is as fast as RC4.
 * Code for the Android file browser is a slightly modified version of ingyesid‘s [simple-file-chooser](https://github.com/ingyesid/simple-file-chooser): see [circulosmeos/simple-file-chooser](https://github.com/circulosmeos/simple-file-chooser).
