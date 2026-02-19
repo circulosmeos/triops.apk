@@ -20,10 +20,6 @@
 // truncate() glibc's requirement
 #define _XOPEN_SOURCE 500
 
-// for correct indication of LFS to sha1.c, stdio.h must be defined here
-// OBVIOUSLY AFTER ALL LFS #define's
-#include <stdio.h>
-
 // .................................................
 // Endianness determination: 
 // Little Endian processors (Intel/AMD x86 & x86_64, or ARM ...) 
