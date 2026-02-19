@@ -2,7 +2,7 @@ v1.7
 
 * Adapted to targetSdkVersion 34 (Android 14) and above, and:
   · Programmed share with this app
-  · Programmed open *.* with this app
+  · Programmed open \*.\* with this app
   · Added human readable size and modified date to file explorer
 
 
